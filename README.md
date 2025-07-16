@@ -1,149 +1,149 @@
 # NoLimitBox - Groter. Meer. Onbeperkt.
 
-Een moderne file upload- en sharing service gebouwd voor Vercel met Blob storage.
+Een moderne file upload service die draait op Vercel met serverless functies.
 
-## ✨ Functionaliteiten
+## 🚀 Functionaliteiten
 
-- **Onbeperkte uploads**: Upload bestanden van elk type en elke grootte
-- **Unieke URLs**: Elk bestand krijgt een unieke, deelbare URL
-- **Moderne UI**: Pastel design met drag & drop functionaliteit
-- **Voorvertoning**: Automatische voorvertoning voor afbeeldingen, video's, audio en tekstbestanden
-- **Responsive**: Werkt perfect op desktop en mobiel
-- **Serverless**: Volledig serverless architectuur op Vercel
+- **Onbeperkte uploads**: Geen limiet op bestandsgrootte of aantal bestanden
+- **Alle bestandstypen**: Upload wat je wilt - documenten, afbeeldingen, video's, software
+- **Directe links**: Krijg meteen een unieke URL om je bestand te delen
+- **Automatische cleanup**: Bestanden worden om middernacht automatisch verwijderd
+- **Moderne UI**: Mooie pastel interface met drag & drop functionaliteit
+- **Responsive design**: Werkt perfect op desktop en mobiel
 
-## 🚀 Snelle Setup
-
-### 1. Project Setup
-```bash
-# Clone de bestanden naar je project directory
-mkdir nolimitbox
-cd nolimitbox
-
-# Installeer dependencies
-npm install
-```
-
-### 2. Vercel Blob Storage Setup
-1. Ga naar je [Vercel Dashboard](https://vercel.com/dashboard)
-2. Ga naar je project → Settings → Storage
-3. Maak een nieuwe Blob store aan
-4. Kopieer de `BLOB_READ_WRITE_TOKEN`
-
-### 3. Environment Variables
-```bash
-# Maak een .env bestand
-cp .env.example .env
-
-# Vul je Blob token in
-BLOB_READ_WRITE_TOKEN=your_blob_token_here
-```
-
-### 4. Lokale Development
-```bash
-# Start development server
-npm run dev
-
-# Open http://localhost:3000
-```
-
-### 5. Deploy naar Vercel
-```bash
-# Deploy via Vercel CLI
-vercel
-
-# Of push naar GitHub en connect via Vercel Dashboard
-```
-
-## 📁 Project Structuur
+## 📁 Projectstructuur
 
 ```
 nolimitbox/
-├── api/                    # Serverless functions
-│   ├── upload.js          # File upload endpoint
-│   └── view.js            # File viewing endpoint
-├── public/                # Static files
-│   ├── index.html         # Homepage
-│   ├── view.html          # File viewer
-│   └── 404.html           # 404 page
-├── main.js                # Local development server
+├── api/
+│   ├── upload.js          # Upload endpoint
+│   ├── view.js            # Bestand weergave
+│   └── download.js        # Download endpoint
+├── public/
+│   ├── index.html         # Hoofdpagina
+│   └── 404.html           # 404 error pagina
+├── main.js                # Lokale development server
 ├── package.json           # Dependencies
-├── vercel.json            # Vercel configuration
-└── .env.example           # Environment variables template
+├── vercel.json           # Vercel configuratie
+└── README.md             # Deze file
 ```
 
-## 🛠️ Technische Details
+## 🛠️ Installatie & Setup
 
-### Upload Process
-1. Gebruiker selecteert/sleept bestand naar upload area
-2. Bestand wordt via FormData naar `/api/upload` gestuurd
-3. Server genereert unieke filename en upload naar Vercel Blob
-4. Gebruiker krijgt view URL terug
+### Lokale ontwikkeling
 
-### View Process
-1. Gebruiker opent `/view/{filename}` URL
-2. Client haalt bestand info op via `/api/view/{filename}`
-3. Automatische voorvertoning op basis van MIME type
-4. Download en share opties beschikbaar
+1. Clone het project
+2. Installeer dependencies:
+   ```bash
+   npm install
+   ```
+3. Start de development server:
+   ```bash
+   npm run dev
+   ```
+4. Open http://localhost:3000 in je browser
 
-### Supported File Types
-- **Afbeeldingen**: JPG, PNG, GIF, SVG, WebP, etc.
-- **Video**: MP4, WebM, AVI, MOV, etc.
-- **Audio**: MP3, WAV, OGG, etc.
-- **Documenten**: PDF, TXT, MD, etc.
-- **Alle andere types**: Download optie beschikbaar
+### Vercel Deployment
 
-## 🎨 Design Features
+1. Installeer Vercel CLI:
+   ```bash
+   npm install -g vercel
+   ```
 
-- **Pastel Color Scheme**: Zachte paars-tinten voor een moderne look
-- **Glassmorphism**: Subtiele blur effects en transparantie
-- **Responsive Design**: Werkt op alle screen sizes
-- **Drag & Drop**: Intuïtieve upload interface
-- **Progress Feedback**: Visuele upload progress
-- **Copy to Clipboard**: Eenvoudig URLs delen
+2. Deploy naar Vercel:
+   ```bash
+   vercel --prod
+   ```
+
+Of gebruik de Vercel dashboard door je GitHub repository te connecten.
 
 ## 🔧 Configuratie
 
-### Vercel.json
-De `vercel.json` configureert:
-- Serverless function routing
-- Static file serving
-- Environment variable mapping
+### Vercel Settings
 
-### Package.json
-Bevat alle benodigde dependencies:
-- `@vercel/blob`: Vercel Blob storage client
-- `express`: Web framework voor lokale development
-- `multer`: File upload middleware
-- `mime-types`: MIME type detection
+- **Node.js Version**: 18.x
+- **Build Command**: Geen (gebruikt serverless functions)
+- **Output Directory**: public
+- **Install Command**: npm install
 
-## 🚨 Belangrijke Opmerkingen
+### Environment Variables
 
-1. **Blob Token**: Zorg ervoor dat je `BLOB_READ_WRITE_TOKEN` correct is ingesteld in je Vercel environment variables
-2. **File Limits**: Vercel heeft standaard upload limits - controleer je plan voor specifieke limits
-3. **CORS**: De API endpoints zijn geconfigureerd voor same-origin requests
-4. **Security**: Bestanden zijn publiek toegankelijk via hun unieke URLs
+Er zijn geen environment variables nodig - alles werkt out of the box!
 
-## 📝 Development Notes
+## 📝 API Endpoints
 
-- Gebruik `npm run dev` voor lokale development
-- De `main.js` simuleert de Vercel serverless environment lokaal
-- Alle static files worden geserved vanuit de `public/` directory
-- API routes zijn beschikbaar onder `/api/`
+### POST /api/upload
+Upload een bestand via multipart/form-data.
 
-## 🔒 Security
+**Response:**
+```json
+{
+  "success": true,
+  "fileId": "1234567890-123456789",
+  "viewUrl": "/view/1234567890-123456789",
+  "downloadUrl": "/download/1234567890-123456789",
+  "originalName": "document.pdf",
+  "size": 1024000
+}
+```
 
-- Unieke filenames voorkomen conflicts
-- Geen authenticatie vereist (bestanden zijn publiek)
-- Rate limiting kan worden toegevoegd via Vercel Edge Functions
-- Bestanden zijn alleen toegankelijk via hun unieke URLs
+### GET /view/{fileId}
+Bekijk een bestand in de browser. Afbeeldingen worden direct getoond, andere bestanden krijgen een download pagina.
 
-## 📞 Support
+### GET /download/{fileId}
+Download een bestand direct.
 
-Voor vragen of problemen:
-1. Controleer de Vercel logs voor errors
-2. Verifieer je environment variables
-3. Test lokaal met `npm run dev`
+## 🎨 Design Features
+
+- **Pastel kleuren**: Zachte, moderne kleurenschema
+- **Drag & Drop**: Sleep bestanden direct naar de upload zone
+- **Progress indicator**: Visuele feedback tijdens upload
+- **Responsive**: Werkt op alle schermformaten
+- **Accessible**: Goede contrast ratios en keyboard navigation
+
+## ⚠️ Belangrijke Notities
+
+- **Automatische cleanup**: Alle bestanden worden om middernacht verwijderd
+- **Serverless beperkingen**: Vercel heeft een 250MB limiet per serverless function
+- **Temporary storage**: Bestanden worden opgeslagen in `/tmp/` op Vercel
+- **Geen persistentie**: Dit is een tijdelijke file sharing service
+
+## 🔒 Security Features
+
+- **Bestandsvalidatie**: Controleert op geldige uploads
+- **Unieke IDs**: Elk bestand krijgt een unieke, onvoorspelbare ID
+- **No directory traversal**: Veilige bestandsopslag
+- **Automatic cleanup**: Voorkomt langdurige opslag van bestanden
+
+## 🚀 Performance
+
+- **Serverless**: Schaalt automatisch op basis van vraag
+- **CDN**: Vercel's global CDN voor snelle laadtijden
+- **Optimized uploads**: Efficiënte multipart upload handling
+
+## 📱 Browser Support
+
+- Chrome 60+
+- Firefox 60+
+- Safari 12+
+- Edge 79+
+
+## 🤝 Contributing
+
+1. Fork het project
+2. Maak een feature branch
+3. Commit je changes
+4. Push naar de branch
+5. Open een Pull Request
+
+## 📄 License
+
+MIT License - zie LICENSE file voor details.
+
+## 🆘 Support
+
+Voor vragen of problemen, open een issue in de GitHub repository.
 
 ---
 
-**NoLimitBox** - Gemaakt voor eenvoudige, onbeperkte file sharing! 🚀
+**NoLimitBox** - Groter. Meer. Onbeperkt. 🚀
