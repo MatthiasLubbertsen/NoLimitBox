@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoLimitBox - Pagina niet gevonden</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        ::selection {
+            background-color: #e8d8f5;
+            color: #6b4c93;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f3ff 0%, #e8d8f5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #6b4c93;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(107, 76, 147, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            color: #b19cd9;
+        }
+
+        .error-code {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #6b4c93;
+            margin-bottom: 1rem;
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #6b4c93;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.1rem;
+            color: #8b6bb1;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #6b4c93 0%, #8b6bb1 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(107, 76, 147, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e8d8f5;
+            color: #6b4c93;
+        }
+
+        .btn-secondary:hover {
+            background: #d1c4e9;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #6b4c93;
+            margin-bottom: 2rem;
+        }
+
+        .suggestions {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .suggestions h3 {
+            color: #6b4c93;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            color: #8b6bb1;
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .suggestions li:before {
+            content: "•";
+            color: #b19cd9;
+            position: absolute;
+            left: 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem;
+            }
+            
+            .error-code {
+                font-size: 3rem;
+            }
+            
+            .error-title {
+                font-size: 1.3rem;
+            }
+            
+            .error-message {
+                font-size: 1rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">NoLimitBox</div>
+        
+        <div class="error-icon">🔍</div>
+        <div class="error-code">404</div>
+        <div class="error-title">Pagina niet gevonden</div>
+        <div class="error-message">
+            Oeps! Het lijkt erop dat deze pagina niet bestaat of dat het bestand dat je zoekt niet meer beschikbaar is.
+        </div>
+        
+        <div class="suggestions">
+            <h3>Wat kun je doen?</h3>
+            <ul>
+                <li>Controleer of de URL correct is getypt</li>
+                <li>Het bestand is mogelijk verlopen of verwijderd</li>
+                <li>Ga terug naar de hoofdpagina om een nieuw bestand te uploaden</li>
+                <li>Probeer het later opnieuw</li>
+            </ul>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn">Terug naar hoofdpagina</a>
+            <button class="btn btn-secondary" onclick="history.back()">Ga terug</button>
+        </div>
+    </div>
+
+    <script>
+        // Optioneel: automatisch terugkeren na een bepaalde tijd
+        setTimeout(() => {
+            const autoReturn = document.createElement('div');
+            autoReturn.style.marginTop = '2rem';
+            autoReturn.style.color = '#8b6bb1';
+            autoReturn.style.fontSize = '0.9rem';
+            autoReturn.innerHTML = 'Je wordt automatisch doorgestuurd naar de hoofdpagina...';
+            document.querySelector('.container').appendChild(autoReturn);
+            
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 3000);
+        }, 10000); // Na 10 seconden beginnen met countdown, dan nog 3 seconden wachten
+    </script>
+</body>
+</html>

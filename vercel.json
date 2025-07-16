@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/view/(.*)",
+      "dest": "/public/view.html"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "env": {
+    "BLOB_READ_WRITE_TOKEN": "@blob_read_write_token"
+  }
+}
