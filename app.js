@@ -10,11 +10,14 @@ const app = express();
 const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
 const uploadPath = isVercel ? '/tmp/' : './tmp/';
 
-// Zorg ervoor dat de lokale tmp directory bestaat
-if (!isVercel) {
+// Zorg ervoor dat de upload directory ALTIJD bestaat
+try {
   if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath, { recursive: true });
+    console.log(`Upload directory aangemaakt: ${uploadPath}`);
   }
+} catch (error) {
+  console.error('Fout bij aanmaken upload directory:', error);
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -47,6 +50,18 @@ app.post('/upload', (req, res) => {
     const ext = path.extname(filename);
     const newFilename = uniqueSuffix + ext;
     const filePath = path.join(uploadPath, newFilename);
+
+    // Extra check: zorg ervoor dat de directory bestaat voordat we schrijven
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      try {
+        fs.mkdirSync(dir, { recursive: true });
+      } catch (err) {
+        console.error('Fout bij aanmaken directory:', err);
+        hasError = true;
+        return res.status(500).send('Fout bij aanmaken upload directory');
+      }
+    }
 
     // Sla bestand op
     const writeStream = fs.createWriteStream(filePath);
