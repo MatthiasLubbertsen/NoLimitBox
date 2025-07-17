@@ -17,18 +17,24 @@ if (!isVercel) {
   }
 }
 
-// Configureer multer om originele bestandsnaam te behouden
-const storage = multer.diskStorage({
-  destination: uploadPath,
-  filename: (req, file, cb) => {
-    // Genereer unieke filename met originele extensie
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, uniqueSuffix + ext);
+// Voor Vercel: gebruik memory storage en sla op in /tmp
+const storage = isVercel 
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: uploadPath,
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
+      }
+    });
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limiet
   }
 });
-
-const upload = multer({ storage: storage });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -37,13 +43,35 @@ app.get('/upload', (req, res) => {
 });
 
 app.post('/upload', upload.single('file'), (req, res) => {
-  const { filename, originalname } = req.file;
-  const fileUrl = `/file/${filename}`;
-  res.send(
-    `<p>Bestand geüpload als <strong>${originalname}</strong></p>` +
-    `<p><a href="${fileUrl}" target="_blank">Klik hier om te bekijken</a></p>` +
-    `<p><a href="${fileUrl}?download=true">Of klik hier om te downloaden</a></p>`
-  );
+  if (!req.file) {
+    return res.status(400).send('Geen bestand geüpload');
+  }
+
+  if (isVercel) {
+    // Voor Vercel: sla het bestand op in /tmp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(req.file.originalname);
+    const filename = uniqueSuffix + ext;
+    const filePath = path.join('/tmp', filename);
+    
+    fs.writeFileSync(filePath, req.file.buffer);
+    
+    const fileUrl = `/file/${filename}`;
+    res.send(
+      `<p>Bestand geüpload als <strong>${req.file.originalname}</strong></p>` +
+      `<p><a href="${fileUrl}" target="_blank">Klik hier om te bekijken</a></p>` +
+      `<p><a href="${fileUrl}?download=true">Of klik hier om te downloaden</a></p>`
+    );
+  } else {
+    // Lokaal: gebruik normale disk storage
+    const { filename, originalname } = req.file;
+    const fileUrl = `/file/${filename}`;
+    res.send(
+      `<p>Bestand geüpload als <strong>${originalname}</strong></p>` +
+      `<p><a href="${fileUrl}" target="_blank">Klik hier om te bekijken</a></p>` +
+      `<p><a href="${fileUrl}?download=true">Of klik hier om te downloaden</a></p>`
+    );
+  }
 });
 
 app.get('/file/:filename', (req, res) => {
@@ -72,6 +100,16 @@ app.get('/file/:filename', (req, res) => {
       res.status(500).send('Fout bij verzenden bestand');
     }
   });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Fallback voor root
+app.get('/', (req, res) => {
+  res.redirect('/upload');
 });
 
 module.exports = app;
