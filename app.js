@@ -1,5 +1,5 @@
 const express = require('express');
-const multer = require('multer');
+const busboy = require('busboy');
 const path = require('path');
 const fs = require('fs');
 const mime = require('mime-types');
@@ -17,67 +17,83 @@ if (!isVercel) {
   }
 }
 
-// Voor Vercel: gebruik memory storage en sla op in /tmp
-const storage = isVercel 
-  ? multer.memoryStorage()
-  : multer.diskStorage({
-      destination: uploadPath,
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, uniqueSuffix + ext);
-      }
-    });
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limiet
-  }
-});
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/upload', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
-app.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('Geen bestand geüpload');
-  }
+app.post('/upload', (req, res) => {
+  const bb = busboy({ 
+    headers: req.headers,
+    limits: {
+      fileSize: 10 * 1024 * 1024 // 10MB limiet
+    }
+  });
+  
+  let uploadedFile = null;
+  let hasError = false;
 
-  if (isVercel) {
-    // Voor Vercel: sla het bestand op in /tmp
+  bb.on('file', (fieldname, file, info) => {
+    const { filename, mimeType } = info;
+    
+    if (!filename) {
+      hasError = true;
+      return res.status(400).send('Geen geldig bestand ontvangen');
+    }
+
+    // Genereer unieke filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(req.file.originalname);
-    const filename = uniqueSuffix + ext;
-    const filePath = path.join('/tmp', filename);
-    
-    fs.writeFileSync(filePath, req.file.buffer);
-    
-    const fileUrl = `/file/${filename}`;
+    const ext = path.extname(filename);
+    const newFilename = uniqueSuffix + ext;
+    const filePath = path.join(uploadPath, newFilename);
+
+    // Sla bestand op
+    const writeStream = fs.createWriteStream(filePath);
+    file.pipe(writeStream);
+
+    uploadedFile = {
+      originalName: filename,
+      filename: newFilename,
+      mimetype: mimeType,
+      path: filePath
+    };
+
+    writeStream.on('error', (err) => {
+      console.error('Fout bij opslaan bestand:', err);
+      hasError = true;
+      if (!res.headersSent) {
+        res.status(500).send('Fout bij opslaan bestand');
+      }
+    });
+  });
+
+  bb.on('error', (err) => {
+    console.error('Busboy error:', err);
+    hasError = true;
+    if (!res.headersSent) {
+      res.status(500).send('Fout bij verwerken upload');
+    }
+  });
+
+  bb.on('finish', () => {
+    if (hasError || !uploadedFile) {
+      return;
+    }
+
+    const fileUrl = `/file/${uploadedFile.filename}`;
     res.send(
-      `<p>Bestand geüpload als <strong>${req.file.originalname}</strong></p>` +
+      `<p>Bestand geüpload als <strong>${uploadedFile.originalName}</strong></p>` +
       `<p><a href="${fileUrl}" target="_blank">Klik hier om te bekijken</a></p>` +
       `<p><a href="${fileUrl}?download=true">Of klik hier om te downloaden</a></p>`
     );
-  } else {
-    // Lokaal: gebruik normale disk storage
-    const { filename, originalname } = req.file;
-    const fileUrl = `/file/${filename}`;
-    res.send(
-      `<p>Bestand geüpload als <strong>${originalname}</strong></p>` +
-      `<p><a href="${fileUrl}" target="_blank">Klik hier om te bekijken</a></p>` +
-      `<p><a href="${fileUrl}?download=true">Of klik hier om te downloaden</a></p>`
-    );
-  }
+  });
+
+  req.pipe(bb);
 });
 
 app.get('/file/:filename', (req, res) => {
-  const filePath = isVercel 
-    ? path.join('/tmp', req.params.filename)
-    : path.join(__dirname, 'tmp', req.params.filename);
+  const filePath = path.join(uploadPath, req.params.filename);
   
   if (!fs.existsSync(filePath)) {
     return res.status(404).send('Bestand niet gevonden');
